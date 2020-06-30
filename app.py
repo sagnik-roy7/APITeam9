@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
-from resources.user import UserRegister, UserLogin, UserBlogs,InsertBlogs,SearchBlog,DeleteUserPost,FindBlogs,EditBlogs
+from resources.user import UserRegister, UserLogin, UserBlogs,InsertBlogs,SearchBlog,DeleteUserPost,FindBlogs,EditBlogs,InsertComment,DeleteComment,UserReplies
 from resources.admin import AdminRegister, AdminLogin,GetAllBlogs,BlockUser,DeletePost
 from datetime import datetime,timedelta
 
@@ -38,6 +38,10 @@ api.add_resource(DeletePost,'/deletepost')
 api.add_resource(DeleteUserPost,'/deleteuserpost')
 api.add_resource(FindBlogs,'/findblog')
 api.add_resource(EditBlogs,'/editblog')
+api.add_resource(InsertComment,'/insertcomment')
+api.add_resource(DeleteComment,'/deletecomment')
+api.add_resource(UserReplies,'/userreplies')
+
 
 if __name__ == '__main__':
     app.run()

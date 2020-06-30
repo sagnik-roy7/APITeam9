@@ -114,6 +114,46 @@ class InsertBlogs(Resource):
 
         return {"message":"Blog inserted successfully"},201
 
+class InsertComment(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+
+        parser.add_argument('post_id', type = str, required = True, help = 'post_id cannot be left blank')
+        parser.add_argument('rollno', type = str, required = True, help = 'rollno cannot be left blank')
+        parser.add_argument('name', type = str, required = True, help = 'name cannot be left blank')
+        parser.add_argument('comment_body', type = str, required = True, help = 'body cannot be left blank')
+
+        data = parser.parse_args()
+
+        try:
+            NotPresent = query(f"""SELECT * FROM users WHERE name = '{data['name']}'""", return_json = False)
+            if len(NotPresent) == 0:
+                return {"message":"Student with given name does not exist in main table"},400
+        except:
+            return {"message":"Error inserting the comments"},500
+
+        try:
+            NotPresent = query(f"""SELECT * FROM users WHERE rollno = '{data['rollno']}'""", return_json = False)
+            if len(NotPresent) == 0:
+                return {"message":"Student with given rollno does not exist in main table"},400
+        except:
+            return {"message":"Error inserting the comments"},500
+
+
+        try:
+            query(f"""insert into comments (post_id,rollno,name,comment_body,comments_date) VALUES (
+                                                                                                    '{data['post_id']}',
+                                                                                                    '{data['rollno']}',
+                                                                                                    '{data['name']}',
+                                                                                                    '{data['comment_body']}',
+                                                                                                    '{datetime.now().replace(microsecond=0, second=0, minute=0) - timedelta(hours=1)}'
+                                                                                                    )"""
+                                                                                                    )
+        except:
+            return {"message":"Error inserting into Comments"},500
+
+        return {"message":"Comment inserted successfully"},201
+
 class EditBlogs(Resource):
     def post(self):
         parser = reqparse.RequestParser()
@@ -172,6 +212,29 @@ class DeleteUserPost(Resource):
         except:
             return {"message" : "An error occurred while deleting."}, 500
         return {"message" : "Deleted successfully."}, 200
+
+class DeleteComment(Resource):
+    def delete(self):
+        parser=reqparse.RequestParser()
+        parser.add_argument('sno',type=str,required=True,help="sno cannot be left blank!")
+        data=parser.parse_args()
+        try:
+            check=query(f"""SELECT * FROM comments WHERE comments_id='{data['sno']}'""",return_json=False)
+            if len(check)==0: return {"message" : "No such Blogs found."}, 404
+            query(f"""DELETE FROM comments WHERE comments_id='{data['sno']}'""")
+        except:
+            return {"message" : "An error occurred while deleting."}, 500
+        return {"message" : "Deleted successfully."}, 200
+
+class UserReplies(Resource):
+    def get(self):
+        parser=reqparse.RequestParser()
+        parser.add_argument('post_id',type=str,required=True,help="please give the post_id")
+        data=parser.parse_args()
+        try:
+            return query(f"""SELECT * FROM comments WHERE post_id='{data['post_id']}'""")
+        except:
+            return {"message":"There was an error displaying the data"},500
 
 class FindBlogs(Resource):
     def get(self):
